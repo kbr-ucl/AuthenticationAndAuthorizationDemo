@@ -9,15 +9,13 @@ namespace AuthenticationDemo.Services.Handlers
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context,
                                                        MinimumAgeRequirement requirement)
         {
-            if (!context.User.HasClaim(c => c.Type == ClaimTypes.DateOfBirth &&
-                                            c.Issuer == "http://contoso.com"))
+            var dateOfBirthClaim = context.User.Claims.FirstOrDefault(a => a.Type == ClaimTypes.DateOfBirth);
+            if (dateOfBirthClaim == null) 
             {
                 return Task.CompletedTask;
             }
 
-            var dateOfBirth = Convert.ToDateTime(
-                context.User.FindFirst(c => c.Type == ClaimTypes.DateOfBirth &&
-                                            c.Issuer == "http://contoso.com")?.Value);
+            var dateOfBirth = Convert.ToDateTime(dateOfBirthClaim.Value);
 
             int calculatedAge = DateTime.Today.Year - dateOfBirth.Year;
             if (dateOfBirth > DateTime.Today.AddYears(-calculatedAge))

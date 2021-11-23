@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using AuthenticationDemo.Data;
 using AuthenticationDemo.Services.Handlers;
 using AuthenticationDemo.Services.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace AuthenticationDemo
 {
@@ -24,7 +26,12 @@ namespace AuthenticationDemo
                     Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddScoped<RoleManager<IdentityRole>>();
+            services.AddScoped<UserClaimsPrincipalFactory<IdentityUser, IdentityRole>>();
+
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -88,6 +95,30 @@ namespace AuthenticationDemo
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+        }
+    }
+
+    public class AppUserClaimsPrincipalFactory<TUser, TRole>
+        : UserClaimsPrincipalFactory<TUser, TRole>
+        where TUser : IdentityUser
+        where TRole : IdentityRole
+    {
+        public AppUserClaimsPrincipalFactory(
+            UserManager<TUser> manager,
+            RoleManager<TRole> rolemanager,
+            IOptions<IdentityOptions> options)
+            : base(manager, rolemanager, options)
+        {
+        }
+
+        public async override Task<ClaimsPrincipal> CreateAsync(TUser user)
+        {
+            var id = await GenerateClaimsAsync(user);
+            if (user != null)
+            {
+                id.AddClaim(new Claim("Zarquon", user.UserName));
+            }
+            return new ClaimsPrincipal(id);
         }
     }
 }

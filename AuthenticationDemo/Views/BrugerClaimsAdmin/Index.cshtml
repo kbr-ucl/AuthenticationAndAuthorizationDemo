@@ -1,0 +1,45 @@
+﻿@model List<System.Security.Claims.Claim>
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+<h4>Claims</h4>
+<p>
+	<a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+	<thead>
+	<tr>
+		<th>
+			@Html.DisplayNameFor(model => model.First().Issuer)
+		</th>
+		<th>
+			@Html.DisplayNameFor(model => model.First().Type)
+		</th>
+		<th>
+			@Html.DisplayNameFor(model => model.First().Value)
+		</th>
+@*		<th></th>*@
+	</tr>
+	</thead>
+	<tbody>
+	@foreach (var item in Model) {
+		<tr>
+			<td>
+				@Html.DisplayFor(modelItem => item.Issuer)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.Type)
+			</td>
+			<td>
+				@Html.DisplayFor(modelItem => item.Value)
+			</td>
+			<td>
+				<a asp-action="Edit" asp-route-id="@item.Type">Edit</a> |
+				<a asp-action="Delete" asp-route-id="@item.Type">Delete</a>
+			</td>
+		</tr>
+	}
+	</tbody>
+</table>
